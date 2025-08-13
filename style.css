@@ -38,3 +38,48 @@ body {
     cursor: pointer;
     user-select: none;
 }
+
+/* --- Estilos para Modo de Exportación de Imagen --- */
+
+/* 1. Añadir margen izquierdo y asegurar un fondo consistente */
+.export-mode #lista-compras {
+    padding-left: 20px;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    background-color: #f8f9fa;
+}
+
+/* 2. Ocultar elementos no deseados (botones de acción y contadores) */
+.export-mode .btn-editar,
+.export-mode .btn-eliminar,
+.export-mode .badge {
+    display: none;
+}
+
+/* 3. Ocultar la barra de prioridad para items ya comprados */
+.export-mode .producto-item.comprado {
+    border-left-color: transparent;
+}
+
+/* 4. Reemplazar el checkbox con un check verde y alinear el texto */
+.export-mode .form-check-input {
+    display: none; /* Ocultamos el checkbox original */
+}
+
+/* Creamos un espacio a la izquierda del texto de todos los productos */
+.export-mode .form-check-label {
+    padding-left: 1.8em; 
+    position: relative; /* Necesario para posicionar el check */
+}
+
+/* Posicionamos el check dentro del espacio creado para los items comprados */
+.export-mode .producto-item.comprado .form-check-label::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    top: 0.05em;
+    font-weight: bold;
+    color: #198754; /* Verde de Bootstrap */
+    font-size: 1.2em;
+    line-height: 1;
+}
