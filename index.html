@@ -12,7 +12,7 @@
 <body>
     <div class="container py-4">
         <header class="text-center mb-4">
-            <h1 class="display-4"><i class="bi bi-cart-check-fill"></i> Compr-As</h1>
+            <h1 class="display-4"><i class="bi bi-cart-check-fill icon-titulo"></i> Compr-As</h1>
             <p class="lead">Tu lista de compras inteligente</p>
         </header>
 
@@ -21,11 +21,9 @@
             <div class="card-body">
                 <h5 class="card-title">Añadir Producto</h5>
                 <div class="input-group mb-3">
-                    <input type="text" id="nombre-producto" class="form-control" placeholder="Nombre del producto (ej: Leche)" list="sugerencias-productos">
+                    <input type="text" id="nombre-producto" class="form-control" placeholder="Producto (ej: Leche)" list="sugerencias-productos">
                     <datalist id="sugerencias-productos"></datalist>
-                    <button class="btn btn-outline-secondary" type="button" id="btn-voz"><i class="bi bi-mic-fill"></i></button>
-                    <label class="btn btn-outline-secondary" for="btn-imagen"><i class="bi bi-camera-fill"></i></label>
-                    <input type="file" accept="image/*" id="btn-imagen" class="d-none">
+                    <button class="btn btn-outline-secondary" type="button" id="btn-voz"><i class="bi bi-mic-fill icon-microfono"></i></button>
                 </div>
                 
                 <div class="row g-3 mb-3">

@@ -1,3 +1,4 @@
+
 document.addEventListener('DOMContentLoaded', () => {
     // ===================================================================================
     // 1. REFERENCIAS A ELEMENTOS DEL DOM
@@ -14,7 +15,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const listaComprasContainer = document.getElementById('lista-compras');
     const totalProductosSpan = document.getElementById('total-productos');
     const btnVoz = document.getElementById('btn-voz');
-    const btnImagen = document.getElementById('btn-imagen');
 
     // Modales de gestión
     const nuevaCategoriaInput = document.getElementById('nueva-categoria');
@@ -48,6 +48,31 @@ document.addEventListener('DOMContentLoaded', () => {
     let modoOrden = 'categoria'; // 'categoria', 'alfa', 'prioridad'
     const prioridadMap = { 'alta': 3, 'media': 2, 'baja': 1 };
 
+    const autoCategoriaMap = {
+        // Lácteos y huevos (id: 3)
+        'leche': 3, 'yogur': 3, 'queso': 3, 'huevos': 3, 'nata': 3, 'kéfir': 3, 'requesón': 3,
+        // Frutas (id: 1)
+        'manzana': 1, 'plátano': 1, 'naranja': 1, 'fresa': 1, 'uva': 1, 'pera': 1, 'melón': 1, 'sandía': 1,
+        // Verduras (id: 2)
+        'tomate': 2, 'cebolla': 2, 'ajo': 2, 'patata': 2, 'lechuga': 2, 'zanahoria': 2, 'pimiento': 2, 'pepino': 2, 'brócoli': 2, 'espinaca': 2,
+        // Carnes (id: 4)
+        'pollo': 4, 'ternera': 4, 'cerdo': 4, 'cordero': 4, 'pavo': 4, 'salchicha': 4, 'hamburguesa': 4, 'jamón': 4,
+        // Pescados (id: 5)
+        'salmón': 5, 'merluza': 5, 'atún': 5, 'sardina': 5, 'bacalao': 5, 'gamba': 5, 'mejillones': 5, 'trucha': 5,
+        // Panadería y cereales (id: 6)
+        'pan': 6, 'cereales': 6, 'arroz': 6, 'pasta': 6, 'avena': 6,
+        // Repostería (id: 7)
+        'azúcar': 7, 'harina': 7, 'levadura': 7, 'chocolate': 7, 'cacao': 7, 'vainilla': 7, 'miel': 7, 'mermelada': 7, 'mantequilla': 7, 'bizcocho': 7, 'galletas': 7, 'magdalena': 7, 'pastel': 7, 'tarta': 7, 'natillas': 7, 'flan': 7,
+        // Limpieza (id: 8)
+        'lejía': 8, 'detergente': 8, 'suavizante': 8, 'lavavajillas': 8, 'fregasuelos': 8, 'limpiacristales': 8,
+        // Higiene personal (id: 9)
+        'champú': 9, 'gel': 9, 'desodorante': 9, 'pasta de dientes': 9, 'papel higiénico': 9, 'jabón': 9,
+        // Bebidas (id: 10)
+        'agua': 10, 'refresco': 10, 'zumo': 10, 'cerveza': 10, 'vino': 10, 'café': 10, 'té': 10,
+        // Despensa (id: 11)
+        'aceite': 11, 'vinagre': 11, 'sal': 11, 'especias': 11, 'conservas': 11, 'salsa': 11, 'almendra': 11, 'nuez': 11, 'cacahuete': 11, 'pistacho': 11, 'avellana': 11, 'anacardo': 11, 'frutos secos': 11, 'aceituna': 11
+    };
+
     // ===================================================================================
     // 3. FUNCIONES
     // ===================================================================================
@@ -62,10 +87,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const cargarDatos = () => {
         productos = JSON.parse(localStorage.getItem('compras-productos')) || [];
         categorias = JSON.parse(localStorage.getItem('compras-categorias')) || [
-            { id: 1, nombre: 'Frutas y verduras' }, { id: 2, nombre: 'Lácteos y huevos' },
-            { id: 3, nombre: 'Carnes y pescados' }, { id: 4, nombre: 'Panadería y cereales' },
-            { id: 5, nombre: 'Limpieza' }, { id: 6, nombre: 'Higiene personal' },
-            { id: 7, nombre: 'Bebidas' }, { id: 8, nombre: 'Despensa' },
+            { id: 1, nombre: 'Frutas' }, { id: 2, nombre: 'Verduras' },
+            { id: 3, nombre: 'Lácteos y huevos' },
+            { id: 4, nombre: 'Carnes' }, { id: 5, nombre: 'Pescados' },
+            { id: 6, nombre: 'Panadería y cereales' },
+            { id: 7, nombre: 'Repostería' },
+            { id: 8, nombre: 'Limpieza' }, { id: 9, nombre: 'Higiene personal' },
+            { id: 10, nombre: 'Bebidas' }, { id: 11, nombre: 'Despensa' },
+            { id: 12, nombre: 'Otros' }
         ];
         tiendas = JSON.parse(localStorage.getItem('compras-tiendas')) || [
             { id: 1, nombre: 'Carrefour' }, { id: 2, nombre: 'Mercadona' },
@@ -507,21 +536,51 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('Tu navegador no soporta el reconocimiento de voz.');
             return;
         }
+        console.log("API de SpeechRecognition encontrada. Iniciando...");
+
         const recognition = new SpeechRecognition();
         recognition.lang = 'es-ES';
         recognition.interimResults = false;
         recognition.maxAlternatives = 1;
-        recognition.start();
-        recognition.onresult = (event) => {
-            nombreProductoInput.value = event.results[0][0].transcript;
-        };
-        recognition.onspeechend = () => { recognition.stop(); };
-        recognition.onerror = (event) => { alert('Error en el reconocimiento de voz: ' + event.error); };
-    };
 
-    const simularReconocimientoImagen = () => {
-        nombreProductoInput.value = 'Producto Reconocido';
-        nombreProductoInput.focus();
+        // --- Eventos para depuración ---
+        recognition.onstart = () => { console.log("Reconocimiento de voz iniciado."); };
+        recognition.onaudiostart = () => { console.log("El navegador ha comenzado a capturar audio."); };
+        recognition.onsoundstart = () => { console.log("Se ha detectado algún sonido."); };
+        recognition.onspeechstart = () => { console.log("Se ha detectado voz."); };
+        recognition.onspeechend = () => {
+            console.log("La voz ha dejado de ser detectada. Deteniendo reconocimiento...");
+            recognition.stop();
+        };
+        recognition.onend = () => { console.log("El reconocimiento de voz ha finalizado."); };
+
+        // --- Eventos de resultado y error ---
+        recognition.onresult = (event) => {
+            console.log("Resultado recibido.");
+            const productoReconocido = event.results[0][0].transcript;
+            nombreProductoInput.value = productoReconocido;
+            sugerirCategoria(productoReconocido);
+        };
+
+        recognition.onerror = (event) => {
+            console.error("Error en reconocimiento de voz:", event.error, event.message);
+            let mensajeError = `Error: ${event.error}`;
+            if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+                mensajeError += '\n\nLa API de voz requiere una conexión segura (HTTPS) para funcionar en la mayoría de navegadores móviles y necesita que concedas permiso para usar el micrófono.';
+            } else if (event.error === 'no-speech') {
+                mensajeError += '\n\nNo se ha detectado ninguna palabra. Inténtalo de nuevo.';
+            } else if (event.error === 'network') {
+                mensajeError += '\n\nError de red. El reconocimiento de voz requiere conexión a internet.';
+            }
+            alert(mensajeError);
+        };
+
+        try {
+            recognition.start();
+        } catch (e) {
+            console.error("Error al intentar iniciar el reconocimiento:", e);
+            alert("No se pudo iniciar el servicio de reconocimiento de voz. Puede que ya esté activo o haya un error interno.");
+        }
     };
 
     const actualizarSugerencias = () => {
@@ -536,9 +595,32 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
+    const sugerirCategoria = (nombreProducto) => {
+        const nombre = nombreProducto.toLowerCase().trim();
+        
+        // Si el campo de texto se limpia, reseteamos la categoría
+        if (!nombre) {
+            categoriaProductoSelect.value = "";
+            return;
+        }
+
+        // Buscamos una nueva categoría para el producto introducido
+        for (const keyword in autoCategoriaMap) {
+            if (nombre.includes(keyword)) {
+                const categoriaId = autoCategoriaMap[keyword];
+                categoriaProductoSelect.value = categoriaId;
+                return; // Encontramos una categoría, la establecemos y salimos.
+            }
+        }
+
+        // Si no se encontró ninguna categoría para el nuevo producto, reseteamos el selector
+        categoriaProductoSelect.value = "";
+    };
+
     // ===================================================================================
     // 4. EVENT LISTENERS
     // ===================================================================================
+    nombreProductoInput.addEventListener('change', () => sugerirCategoria(nombreProductoInput.value));
     btnAnadir.addEventListener('click', anadirProducto);
     btnAnadirCategoria.addEventListener('click', anadirCategoria);
     btnAnadirTienda.addEventListener('click', anadirTienda);
@@ -551,7 +633,6 @@ document.addEventListener('DOMContentLoaded', () => {
     btnExportPdf.addEventListener('click', exportarPdf);
     btnImportTxt.addEventListener('change', importarTxt);
     btnVoz.addEventListener('click', iniciarReconocimientoVoz);
-    btnImagen.addEventListener('change', simularReconocimientoImagen);
     nombreProductoInput.addEventListener('input', actualizarSugerencias);
 
     listaComprasContainer.addEventListener('click', (e) => {
@@ -619,8 +700,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ===================================================================================
     // 5. INICIALIZACIÓN
     // ===================================================================================
-    const listaAutocompletado = ['Manzanas', 'Plátanos', 'Naranjas', 'Uvas', 'Fresas', 'Arándanos', 'Frambuesas', 'Moras', 'Sandía', 'Melón', 'Piña', 'Mangos', 'Kiwis', 'Limones', 'Limas', 'Aguacates', 'Duraznos', 'Nectarinas', 'Ciruelas', 'Cerezas', 'Peras', 'Toronja', 'Granada', 'Papaya', 'Higos', 'Dátiles', 'Coco', 'Maracuyá', 'Guayaba', 'Lichi', 'Tomates', 'Lechuga', 'Espinacas', 'Kale', 'Brócoli', 'Coliflor', 'Zanahorias', 'Apio', 'Pepinos', 'Pimientos', 'Cebollas', 'Ajo', 'Papas', 'Batatas', 'Champiñones', 'Calabacín', 'Berenjena', 'Espárragos', 'Maíz', 'Judías verdes', 'Guisantes', 'Repollo', 'Coles de Bruselas', 'Rábanos', 'Remolacha', 'Nabo', 'Calabaza', 'Jengibre', 'Cilantro', 'Perejil', 'Carne molida de res', 'Bistec de res', 'Asado de res', 'Costillas de res', 'Carne para estofado', 'Chuletas de cerdo', 'Lomo de cerdo', 'Tocino', 'Salchichas de cerdo', 'Jamón', 'Pechuga de pollo', 'Muslos de pollo', 'Alas de pollo', 'Pollo entero', 'Pavo molido', 'Pechuga de pavo', 'Salmón', 'Atún', 'Tilapia', 'Bacalao', 'Camarones', 'Almejas', 'Mejillones', 'Cangrejo', 'Langosta', 'Leche', 'Crema de leche', 'Mantequilla', 'Margarina', 'Yogur', 'Queso cheddar', 'Queso mozzarella', 'Queso suizo', 'Queso parmesano', 'Queso de cabra', 'Requesón', 'Crema agria', 'Huevos', 'Leche de almendras', 'Leche de soja', 'Leche de avena', 'Pan de molde', 'Panecillos', 'Bagels', 'Muffins ingleses', 'Pan de pita', 'Tortillas de harina', 'Tortillas de maíz', 'Cereal de desayuno', 'Avena', 'Granola', 'Barritas de cereal', 'Arroz blanco', 'Arroz integral', 'Pasta espagueti', 'Pasta penne', 'Quinoa', 'Cuscús', 'Lentejas', 'Frijoles negros', 'Garbanzos', 'Tomates enlatados', 'Salsa de tomate', 'Frijoles enlatados', 'Maíz enlatado', 'Guisantes enlatados', 'Atún enlatado', 'Sopas enlatadas', 'Caldo de pollo', 'Sal', 'Pimienta negra', 'Aceite de oliva', 'Aceite vegetal', 'Vinagre blanco', 'Ketchup', 'Mostaza', 'Mayonesa', 'Salsa de soja', 'Salsa picante', 'Miel', 'Jarabe de arce', 'Mermelada', 'Mantequilla de cacahuete', 'Orégano seco', 'Albahaca seca', 'Romero seco', 'Tomillo seco', 'Pimentón', 'Chile en polvo', 'Comino molido', 'Canela molida', 'Nuez moscada', 'Ajo en polvo', 'Cebolla en polvo', 'Harina de trigo', 'Azúcar granulada', 'Polvo de hornear', 'Bicarbonato de sodio', 'Extracto de vainilla', 'Chispas de chocolate', 'Cacao en polvo', 'Levadura', 'Agua embotellada', 'Agua con gas', 'Jugo de naranja', 'Jugo de manzana', 'Refrescos de cola', 'Té negro', 'Café molido', 'Leche con chocolate', 'Bebidas deportivas', 'Bebidas energéticas', 'Cerveza', 'Vino tinto', 'Vino blanco', 'Verduras congeladas', 'Frutas congeladas', 'Pizza congelada', 'Comidas preparadas congeladas', 'Helado', 'Papas fritas congeladas', 'Nuggets de pollo congelados', 'Papas fritas de bolsa', 'Tortilla chips', 'Pretzels', 'Galletas saladas', 'Galletas dulces', 'Palomitas de maíz', 'Frutos secos', 'Frutas secas', 'Barritas de granola', 'Chocolate en barra', 'Champú', 'Acondicionador', 'Jabón en barra', 'Gel de ducha', 'Pasta de dientes', 'Cepillo de dientes', 'Hilo dental', 'Enjuague bucal', 'Desodorante', 'Loción corporal', 'Protector solar', 'Maquinillas de afeitar', 'Crema de afeitar', 'Productos de higiene femenina', 'Papel higiénico', 'Detergente para la ropa', 'Suavizante de telas', 'Lejía', 'Limpiador multiusos', 'Limpiacristales', 'Lavavajillas líquido', 'Detergente para lavavajillas', 'Esponjas de cocina', 'Toallas de papel', 'Bolsas de basura', 'Pañales', 'Toallitas húmedas para bebé', 'Fórmula para bebés', 'Comida para bebés', 'Champú para bebé', 'Loción para bebé', 'Comida para perros', 'Galletas para perros', 'Comida para gatos', 'Arena para gatos', 'Aceitunas', 'Alcaparras', 'Anchoas', 'Sardinas enlatadas', 'Chorizo', 'Salchichón', 'Mortadela', 'Pastel de carne', 'Tofu', 'Tempeh', 'Seitan', 'Leche de coco', 'Leche de arroz', 'Queso feta', 'Queso azul', 'Queso brie', 'Queso camembert', 'Queso gouda', 'Queso provolone', 'Pan de centeno', 'Pan integral', 'Croissants', 'Donas', 'Galletas de avena', 'Galletas de chocolate', 'Arroz basmati', 'Arroz jazmín', 'Fideos de arroz', 'Lasaña', 'Macarrones', 'Fideos udon', 'Fideos soba', 'Salsa barbacoa', 'Salsa teriyaki', 'Salsa Worcestershire', 'Mostaza de Dijon', 'Vinagre de vino tinto', 'Vinagre balsámico', 'Aceite de sésamo', 'Aceite de coco', 'Pimienta de cayena', 'Cúrcuma', 'Curry en polvo', 'Jengibre en polvo', 'Semillas de chía', 'Semillas de lino', 'Semillas de sésamo', 'Miel de agave', 'Azúcar moreno', 'Harina de almendras', 'Harina de coco', 'Nueces', 'Almendras', 'Pistachos', 'Anacardos', 'Cacahuetes', 'Té verde', 'Té de manzanilla', 'Café en grano', 'Café instantáneo', 'Jugo de arándano', 'Jugo de uva', 'Limonada', 'Tónica', 'Cerveza artesanal', 'Vino rosado', 'Champán', 'Ron', 'Vodka', 'Ginebra', 'Whisky', 'Tequila', 'Brandy', 'Edamame congelado', 'Pescado empanizado congelado', 'Hamburguesas vegetales congeladas', 'Waffles congelados', 'Pan de ajo congelado', 'Chicles', 'Caramelos', 'Gomitas', 'Malvaviscos', 'Regaliz', 'Jabón de manos líquido', 'Toallitas desinfectantes', 'Limpiador de baño', 'Limpiador de cocina', 'Bolsas para sándwich', 'Papel de aluminio', 'Film transparente', 'Velas', 'Cerillas', 'Bombillas', 'Pilas', 'Comida para peces', 'Comida para pájaros', 'Heno para roedores', 'Lechuga iceberg', 'Lechuga romana', 'Rúcula', 'Acelgas', 'Col rizada', 'Puerros', 'Cebolletas', 'Alcachofas', 'Hinojo', 'Chayote', 'Okra', 'Colinabo', 'Chirivía', 'Manzanas Granny Smith', 'Manzanas Fuji', 'Manzanas Gala', 'Uvas rojas', 'Uvas verdes', 'Melocotones', 'Albaricoques', 'Caquis', 'Carambola', 'Rambután', 'Mangostán', 'Fruta del dragón', 'Salchichas italianas', 'Salchichas de pavo', 'Carne de cordero', 'Costillas de cordero', 'Pato', 'Codorniz', 'Hígado de pollo', 'Mollejas', 'Pulpo', 'Calamar', 'Vieiras', 'Ostras', 'Yogur griego', 'Yogur de soja', 'Kéfir', 'Leche condensada', 'Leche evaporada', 'Nata para montar', 'Queso crema', 'Queso manchego', 'Queso de oveja', 'Pan de masa madre', 'Focaccia', 'Ciabatta', 'Pan de ajo', 'Crutones', 'Cereales integrales', 'Muesli', 'Arroz salvaje', 'Cebada', 'Bulgur', 'Pasta de trigo integral', 'Gnocchi', 'Ravioles', 'Tortellini', 'Salsa Alfredo', 'Salsa pesto', 'Salsa marinara', 'Chutney de mango', 'Salsa de pescado', 'Pasta de curry', 'Wasabi', 'Rábano picante', 'Sal rosa del Himalaya', 'Pimienta blanca', 'Azafrán', 'Cardamomo', 'Clavo', 'Anís estrellado', 'Hojas de laurel', 'Vainas de vainilla', 'Azúcar glas', 'Azúcar de coco', 'Melaza', 'Levadura nutricional', 'Goma xantana', 'Pipas de girasol', 'Pipas de calabaza', 'Nueces de Brasil', 'Nueces de macadamia', 'Avellanas', 'Té de jengibre', 'Té de menta', 'Mate', 'Horchata', 'Agua de coco', 'Kombucha', 'Sidra', 'Vino de Oporto', 'Vermut', 'Licor de café', 'Sorbete', 'Yogur helado', 'Polos de hielo', 'Masa de hojaldre congelada', 'Masa para galletas congelada', 'Frutos rojos congelados', 'Mango congelado', 'Piña congelada', 'Barritas de proteína', 'Galletas de arroz', 'Turrón', 'Mazapán', 'Fruta confitada', 'Crema de avellanas', 'Enjuague bucal sin alcohol', 'Protector labial', 'Crema de manos', 'Aceite corporal', 'Sales de baño', 'Mascarilla facial', 'Algodón', 'Bastoncillos de algodón', 'Tiritas', 'Vendas', 'Alcohol isopropílico', 'Agua oxigenada', 'Ambientador', 'Insecticida', 'Bolsas de congelación', 'Filtros de café', 'Servilletas de papel', 'Palillos', 'Juguetes para perros', 'Juguetes para gatos', 'Correa para perro', 'Collar para gato', 'Apio nabo', 'Endivias', 'Grelos', 'Tupinambo', 'Tomatillos', 'Clementinas', 'Mandarinas', 'Pomelos', 'Kumquats', 'Longan', 'Salak', 'Carne de venado', 'Carne de búfalo', 'Salmón ahumado', 'Trucha', 'Rodaballo', 'Mero', 'Pez espada', 'Anguila', 'Erizos de mar', 'Percebes', 'Queso emmental', 'Queso gruyere', 'Queso havarti', 'Queso roquefort', 'Mascarpone', 'Pan de pita integral', 'Naan', 'Pumpernickel', 'Scones', 'Magdalenas', 'Polenta', 'Amaranto', 'Mijo', 'Harina de centeno', 'Harina de espelta', 'Fideos de huevo', 'Couscous integral', 'Salsa de ostras', 'Salsa hoisin', 'Vinagre de arroz', 'Aceite de aguacate', 'Aceite de nuez', 'Pimentón ahumado', 'Semillas de amapola', 'Semillas de cilantro', 'Fenogreco', 'Galanga', 'Hierba de limón', 'Edulcorante artificial', 'Stevia', 'Pectina', 'Castañas', 'Piñones', 'Té oolong', 'Té blanco', 'Café descafeinado', 'Cacao caliente', 'Zumo de tomate', 'Zumo de piña', 'Cerveza sin alcohol', 'Licor de hierbas', 'Aperol', 'Campari', 'Masa para pizza congelada', 'Croquetas congeladas', 'Empanadillas congeladas', 'Canelones congelados', 'Verduras para saltear congeladas', 'Patatas bravas congeladas', 'Chocolate blanco', 'Chocolate negro', 'Bombones', 'Frutos secos cubiertos de chocolate', 'Cortaúñas', 'Lima de uñas', 'Pinzas', 'Tónico facial', 'Desmaquillante', 'Espuma de afeitar', 'After-shave', 'Talco', 'Guantes de limpieza', 'Estropajos', 'Leche en polvo para bebé', 'Cereales para bebé', 'Galletas para la dentición', 'Aceite para bebé', 'Premios para perros', 'Huesos de cuero', 'Hierba gatera', 'Snacks para gatos', 'Bok choy', 'Daikon', 'Jícama', 'Kohlrabi', 'Patatas moradas', 'Yuca', 'Lulos', 'Uchuvas', 'Tamarillo', 'Tamarindo', 'Carne de cabra', 'Chuletón de buey', 'Butifarra', 'Morcilla', 'Sobrasada', 'Ancas de rana', 'Caviar', 'Surimi', 'Yogur de coco', 'Yogur de oveja', 'Queso halloumi', 'Paneer', 'Panettone', 'Stollen', 'Biscotti', 'Grissini', 'Tostadas', 'Harina de garbanzo', 'Harina de arroz', 'Tapioca', 'Sémola', 'Fideos ramen', 'Salsa de soja baja en sodio', 'Mirin', 'Sake', 'Aceite de palma', 'Ghee', 'Pimienta de Jamaica', 'Zumaque', 'Asafétida', 'Achiote', 'Extracto de almendra', 'Colorante alimentario', 'Glaseado para pasteles', 'Decoraciones de azúcar', 'Anacardos salados', 'Almendras tostadas', 'Té chai', 'Té rooibos', 'Bebida de almendras', 'Bebida de arroz', 'Refresco de jengibre', 'Zumo de mango', 'Zumo de melocotón', 'Cerveza negra', 'Cerveza de trigo', 'Prosecco', 'Cava', 'Absenta', 'Sake', 'Pacharán', 'Orujo', 
-        'Helado de vainilla', 'Helado de chocolate', 'Helado de fresa', 'Tarta de queso congelada', 'Tarta de manzana congelada', 'Rollitos de primavera congelados', 'Gyozas congeladas', 'Aros de cebolla congelados', 'Barritas de pescado congeladas', 'Caramelos de menta', 'Pastillas para la tos', 'Barritas energéticas', 'Chips de plátano', 'Chips de vegetales', 'Hilo dental con cera', 'Cepillo de dientes eléctrico', 'Irrigador bucal', 'Crema antiarrugas', 'Sérum facial', 'Contorno de ojos', 'Exfoliante corporal', 'Piedra pómez', 'Limpiador de hornos', 'Desatascador de tuberías', 'Suavizante concentrado', 'Quitamanchas', 'Papilla de frutas para bebé', 'Potitos de verdura para bebé', 'Juguetes para la dentición', 'Biberones', 'Chupetes', 'Comida húmeda para perros', 'Comida húmeda para gatos', 'Vitaminas para mascotas', 'Malta para gatos', 'Acelga roja', 'Berros', 'Canónigos', 'Cardo', 'Escarola', 'Guisantes lágrima', 'Habas frescas', 'Tirabeques', 'Tomate raf', 'Tomate rosa', 'Brevas', 'Chirimoya', 'Kiwano', 'Nísperos', 'Paraguayas', 'Codillo de cerdo', 'Entrecot de ternera', 'Solomillo de cerdo ibérico', 'Panceta', 'Fiambre de pavo', 'Cangrejo real', 'Langostinos', 'Cigalas', 'Navajas', 'Berberechos', 'Requesón de cabra', 'Yogur búlgaro', 'Skyr', 'Queso cottage', 'Queso quark', 'Pan de espelta', 'Pan de kamut', 'Colines', 'Picos de pan', 'Regañás', 'Harina de fuerza', 'Harina de repostería', 'Cuscús perlado', 'Fregola', 'Orzo', 'Salsa de yogur', 'Salsa tártara', 'Vinagreta', 'Pasta de sésamo (tahini)', 'Melaza de granada', 'Aceite de girasol', 'Manteca de cerdo', 'Pimienta rosa', 'Bayas de enebro', 'Macis', 'Nigella', 'Sal de apio', 'Extracto de limón', 'Agua de azahar', 'Fondant', 'Nueces pecanas', 'Castañas de cajú', 'Infusión de tila', 'Infusión de poleo menta', 'Café torrefacto', 'Bebida de soja con chocolate', 'Mosto', 'Zumo de granada', 'Zumo de multifrutas', 'Cerveza tostada', 'Cerveza roja', 'Lambrusco', 'Moscato', 'Grappa', 'Pisco', 'Mezcal', 'Cachaça', 'Licor de melocotón', 'Licor de manzana', 'Helado de pistacho', 'Helado de turrón', 'Tiramisú congelado', 'Coulant de chocolate congelado', 'Lasaña congelada', 'Moussaka congelada', 'Pimientos del piquillo rellenos congelados', 'Alcachofas rebozadas congeladas', 'Chocolate con leche', 'Chocolate con almendras', 'Tableta de chocolate para postres', 'Almendras garrapiñadas', 'Pistachos tostados y salados', 'Enjuague bucal infantil', 'Pasta de dientes para niños', 'Cepillo de dientes suave', 'Crema hidratante con color', 'BB cream', 'CC cream', 'Mascarilla para el pelo', 'Sérum para el pelo', 'Laca', 'Gomina', 'Cera para el pelo', 'Descalcificador para lavadora', 'Abrillantador para lavavajillas', 'Sal para lavavajillas', 'Friegasuelos', 'Leche de continuación para bebé', 'Toallitas para el cambio de pañal', 'Crema para el culito del bebé', 'Esponja natural para bebé', 'Tijeras de uñas para bebé', 'Pienso para cachorros', 'Pienso para perros senior', 'Pienso para gatos esterilizados', 'Pienso para gatitos', 'Snacks dentales para perros', 'Juguetes interactivos para gatos', 'Rascadores para gatos', 'Camas para mascotas', 'Endibia roja', 'Radicchio', 'Tatsoi', 'Calabaza bonetera', 'Calabaza cacahuete', 'Pimiento de Padrón', 'Pimiento choricero', 'Gindillas', 'Ajo negro', 'Cebolla morada', 'Membrillo', 'Physalis', 'Mirabeles', 'Reinetas', 'Verde doncella', 'Carrilleras de cerdo', 'Entraña de ternera', 'Magret de pato', 'Confit de pato', 'Cecina', 'Pulpo cocido', 'Sepia', 'Bígaros', 'Cañaíllas', 'Ortiguillas de mar', 'Cuajada', 'Leche de cabra', 'Kumis', 'Queso de tetilla', 'Queso idiazábal', 'Pan de hogaza', 'Pan de chapata', 'Pan de cristal', 'Tortas de aceite', 'Rosquilletas', 'Harina de maíz', 'Harina de teff', 'Polenta instantánea', 'Arroz bomba', 'Arroz venere', 'Salsa brava', 'Salsa romesco', 'Alioli', 'Pasta de ají amarillo', 'Sirope de chocolate', 'Sirope de caramelo', 'Manteca de cacao', 'Grasa de pato', 'Pimienta de Sichuan', 'Cardamomo negro', 'Vainilla en polvo', 'Sal ahumada', 'Sal en escamas', 'Esencia de ron', 'Esencia de anís', 'Perlas de azúcar', 'Fideos de chocolate', 'Cacahuetes garrapiñados', 'Nueces de pecán caramelizadas', 'Infusión de frutos rojos', 'Infusión relajante', 'Café en cápsulas', 'Bebida de avellana', 'Zumo de pomelo', 'Zumo de albaricoque', 'Cerveza IPA', 'Cerveza stout', 'Vino frizzante', 'Vino de aguja', 'Licor de cereza', 'Licor de almendras', 'Amaretto', 'Frangelico', 'Limoncello', 'Sambuca', 'Helado de limón', 'Helado de café', 'Profiteroles congelados', 'Buñuelos congelados', 'Churros congelados', 'Tequeños congelados', 'Alitas de pollo adobadas congeladas', 'Costillas a la barbacoa congeladas', 'Salteado de gambas y verduras congelado', 'Paella de marisco congelada', 'Chocolate para fundir', 'Cacao puro en polvo', 'Pepitas de chocolate', 'Fruta deshidratada', 'Orejones', 'Ciruelas pasas', 'Dátiles sin hueso', 'Higos secos', 'Pasta de dientes blanqueadora', 'Pasta de dientes para encías sensibles', 'Colutorio con flúor', 'Aceite seco', 'Crema reafirmante', 'Gel reductor', 'Tratamiento anticelulítico', 'Champú en seco', 'Mascarilla de color para el pelo', 'Protector térmico para el pelo', 'Limpiador antical', 'Detergente para prendas delicadas', 'Bolas antipolillas', 'Recambios de ambientador', 'Cereales hidrolizados para bebé', 'Tarritos de fruta y yogur para bebé', 'Toallitas nasales para bebé', 'Aspirador nasal para bebé', 'Termómetro de baño', 'Pienso hipoalergénico para perros', 'Pienso sin cereales para gatos', 'Snacks naturales para perros', 'Latas de paté para gatos', 'Juguetes de cuerda para perros', 'Plumeros para gatos', 'Lecho vegetal para roedores', 'Piedras minerales para pájaros'];
+    const listaAutocompletado = ['Leche', 'Pan', 'Huevos', 'Queso', 'Jamón', 'Yogur', 'Mantequilla', 'Cereales', 'Arroz', 'Pasta', 'Lentejas', 'Garbanzos', 'Tomate', 'Cebolla', 'Ajo', 'Patatas', 'Lechuga', 'Pimiento', 'Pepino', 'Zanahoria', 'Manzanas', 'Plátanos', 'Naranjas', 'Fresas', 'Uvas', 'Pollo', 'Carne de ternera', 'Pescado', 'Atún en lata', 'Aceite de oliva', 'Vinagre', 'Sal', 'Azúcar', 'Harina', 'Café', 'Té', 'Galletas', 'Chocolate', 'Agua mineral', 'Refrescos', 'Cerveza', 'Vino', 'Papel higiénico', 'Servilletas', 'Detergente', 'Suavizante', 'Lavavajillas', 'Bolsas de basura', 'Champú', 'Gel de ducha', 'Pasta de dientes', 'Jabón de manos', 'Aceitunas', 'Maíz', 'Champiñones', 'Espárragos', 'Brócoli', 'Coliflor', 'Espinacas', 'Acelgas', 'Calabacín', 'Berenjena', 'Limones', 'Aguacate', 'Kiwi', 'Melón', 'Sandía', 'Piña', 'Mango', 'Pera', 'Melocotón', 'Ciruelas', 'Cerezas', 'Frutos secos', 'Nueces', 'Almendras', 'Pistachos', 'Avellanas', 'Miel', 'Mermelada', 'Cacao en polvo', 'Salsas', 'Ketchup', 'Mayonesa', 'Mostaza', 'Especias', 'Pimienta', 'Orégano', 'Comino', 'Pimentón', 'Canela', 'Laurel', 'Perejil', 'Helado', 'Pizzas congeladas', 'Verduras congeladas', 'Croquetas', 'Empanadillas', 'Leche condensada', 'Nata para cocinar', 'Caldo', 'Sopa', 'Puré de patatas', 'Alubias', 'Guisantes', 'Habas', 'Soja', 'Tofu', 'Seitán', 'Leche de avena', 'Leche de soja', 'Leche de almendras', 'Yogures de soja', 'Margarina', 'Pan de molde', 'Biscotes', 'Magdalenas', 'Croissants', 'Donuts', 'Tortillas de trigo', 'Nachos', 'Patatas fritas', 'Palomitas', 'Golosinas', 'Zumo de naranja', 'Zumo de piña', 'Zumo de melocotón', 'Tónica', 'Bebida energética', 'Agua con gas', 'Hielo', 'Velas', 'Pilas', 'Bombillas', 'Fósforos', 'Insecticida', 'Ambientador', 'Papel de cocina', 'Papel de aluminio', 'Film transparente', 'Fregasuelos', 'Limpiacristales', 'Lejía', 'Amoniaco', 'Estropajos', 'Bayetas', 'Guantes de limpieza', 'Desodorante', 'Crema hidratante', 'Protector solar', 'Cuchillas de afeitar', 'Espuma de afeitar', 'Algodón', 'Bastoncillos', 'Tiritas', 'Alcohol', 'Agua oxigenada', 'Comida para mascotas', 'Arena para gatos', 'Juguetes para mascotas', 'Correa', 'Collar', 'Biberón', 'Chupete', 'Pañales', 'Toallitas húmedas', 'Potitos', 'Leche en polvo', 'Cereales infantiles', 'Galletas para bebés', 'Compresas', 'Tampones', 'Salvaslips', 'Preservativos', 'Lubricante', 'Enjuague bucal', 'Seda dental', 'Cepillo de dientes', 'Ensalada preparada', 'Gazpacho', 'Salmorejo', 'Hummus', 'Guacamole', 'Aceite de girasol', 'Vinagre de manzana', 'Salsa de soja', 'Salsa picante', 'Hierbas provenzales', 'Azafrán', 'Vainilla', 'Levadura', 'Bicarbonato', 'Fruta en almíbar', 'Tomate frito', 'Tomate triturado', 'Helado de vainilla', 'Helado de chocolate', 'Helado de fresa', 'Tarta de queso congelada', 'Tarta de manzana congelada', 'Rollitos de primavera congelados', 'Gyozas congeladas', 'Aros de cebolla congelados', 'Barritas de pescado congeladas', 'Caramelos de menta', 'Pastillas para la tos', 'Barritas energéticas', 'Chips de plátano', 'Chips de vegetales', 'Hilo dental con cera', 'Cepillo de dientes eléctrico', 'Irrigador bucal', 'Crema antiarrugas', 'Sérum facial', 'Contorno de ojos', 'Exfoliante corporal', 'Piedra pómez', 'Limpiador de hornos', 'Desatascador de tuberías', 'Suavizante concentrado', 'Quitamanchas', 'Papilla de frutas para bebé', 'Potitos de verdura para bebé', 'Juguetes para la dentición', 'Biberones', 'Chupetes', 'Comida húmeda para perros', 'Comida húmeda para gatos', 'Vitaminas para mascotas', 'Malta para gatos', 'Acelga roja', 'Berros', 'Canónigos', 'Cardo', 'Escarola', 'Guisantes lágrima', 'Habas frescas', 'Tirabeques', 'Tomate raf', 'Tomate rosa', 'Brevas', 'Chirimoya', 'Kiwano', 'Nísperos', 'Paraguayas', 'Codillo de cerdo', 'Entrecot de ternera', 'Solomillo de cerdo ibérico', 'Panceta', 'Fiambre de pavo', 'Cangrejo real', 'Langostinos', 'Cigalas', 'Navajas', 'Berberechos', 'Requesón de cabra', 'Yogur búlgaro', 'Skyr', 'Queso cottage', 'Queso quark', 'Pan de espelta', 'Pan de kamut', 'Colines', 'Picos de pan', 'Regañás', 'Harina de fuerza', 'Harina de repostería', 'Cuscús perlado', 'Fregola', 'Orzo', 'Salsa de yogur', 'Salsa tártara', 'Vinagreta', 'Pasta de sésamo (tahini)', 'Melaza de granada', 'Aceite de girasol', 'Manteca de cerdo', 'Pimienta rosa', 'Bayas de enebro', 'Macis', 'Nigella', 'Sal de apio', 'Extracto de limón', 'Agua de azahar', 'Fondant', 'Nueces pecanas', 'Castañas de cajú', 'Infusión de tila', 'Infusión de poleo menta', 'Café torrefacto', 'Bebida de soja con chocolate', 'Mosto', 'Zumo de granada', 'Zumo de multifrutas', 'Cerveza tostada', 'Cerveza roja', 'Lambrusco', 'Moscato', 'Grappa', 'Pisco', 'Mezcal', 'Cachaça', 'Licor de melocotón', 'Licor de manzana', 'Helado de pistacho', 'Helado de turrón', 'Tiramisú congelado', 'Coulant de chocolate congelado', 'Lasaña congelada', 'Moussaka congelada', 'Pimientos del piquillo rellenos congelados', 'Alcachofas rebozadas congeladas', 'Chocolate con leche', 'Chocolate con almendras', 'Tableta de chocolate para postres', 'Almendras garrapiñadas', 'Pistachos tostados y salados', 'Enjuague bucal infantil', 'Pasta de dientes para niños', 'Cepillo de dientes suave', 'Crema hidratante con color', 'BB cream', 'CC cream', 'Mascarilla para el pelo', 'Sérum para el pelo', 'Laca', 'Gomina', 'Cera para el pelo', 'Descalcificador para lavadora', 'Abrillantador para lavavajillas', 'Sal para lavavajillas', 'Friegasuelos', 'Leche de continuación para bebé', 'Toallitas para el cambio de pañal', 'Crema para el culito del bebé', 'Esponja natural para bebé', 'Tijeras de uñas para bebé', 'Pienso para cachorros', 'Pienso para perros senior', 'Pienso para gatos esterilizados', 'Pienso para gatitos', 'Snacks dentales para perros', 'Juguetes interactivos para gatos', 'Rascadores para gatos', 'Camas para mascotas', 'Endibia roja', 'Radicchio', 'Tatsoi', 'Calabaza bonetera', 'Calabaza cacahuete', 'Pimiento de Padrón', 'Pimiento choricero', 'Gindillas', 'Ajo negro', 'Cebolla morada', 'Membrillo', 'Physalis', 'Mirabeles', 'Reinetas', 'Verde doncella', 'Carrilleras de cerdo', 'Entraña de ternera', 'Magret de pato', 'Confit de pato', 'Cecina', 'Pulpo cocido', 'Sepia', 'Bígaros', 'Cañaíllas', 'Ortiguillas de mar', 'Cuajada', 'Leche de cabra', 'Kumis', 'Queso de tetilla', 'Queso idiazábal', 'Pan de hogaza', 'Pan de chapata', 'Pan de cristal', 'Tortas de aceite', 'Rosquilletas', 'Harina de maíz', 'Harina de teff', 'Polenta instantánea', 'Arroz bomba', 'Arroz venere', 'Salsa brava', 'Salsa romesco', 'Alioli', 'Pasta de ají amarillo', 'Sirope de chocolate', 'Sirope de caramelo', 'Manteca de cacao', 'Grasa de pato', 'Pimienta de Sichuan', 'Cardamomo negro', 'Vainilla en polvo', 'Sal ahumada', 'Sal en escamas', 'Esencia de ron', 'Esencia de anís', 'Perlas de azúcar', 'Fideos de chocolate', 'Cacahuetes garrapiñados', 'Nueces de pecán caramelizadas', 'Infusión de frutos rojos', 'Infusión relajante', 'Café en cápsulas', 'Bebida de avellana', 'Zumo de pomelo', 'Zumo de albaricoque', 'Cerveza IPA', 'Cerveza stout', 'Vino frizzante', 'Vino de aguja', 'Licor de cereza', 'Licor de almendras', 'Amaretto', 'Frangelico', 'Limoncello', 'Sambuca', 'Helado de limón', 'Helado de café', 'Profiteroles congelados', 'Buñuelos congelados', 'Churros congelados', 'Tequeños congelados', 'Alitas de pollo adobadas congeladas', 'Costillas a la barbacoa congeladas', 'Salteado de gambas y verduras congelado', 'Paella de marisco congelada', 'Chocolate para fundir', 'Cacao puro en polvo', 'Pepitas de chocolate', 'Fruta deshidratada', 'Orejones', 'Ciruelas pasas', 'Dátiles sin hueso', 'Higos secos', 'Pasta de dientes blanqueadora', 'Pasta de dientes para encías sensibles', 'Colutorio con flúor', 'Aceite seco', 'Crema reafirmante', 'Gel reductor', 'Tratamiento anticelulítico', 'Champú en seco', 'Mascarilla de color para el pelo', 'Protector térmico para el pelo', 'Limpiador antical', 'Detergente para prendas delicadas', 'Bolas antipolillas', 'Recambios de ambientador', 'Cereales hidrolizados para bebé', 'Tarritos de fruta y yogur para bebé', 'Toallitas nasales para bebé', 'Aspirador nasal para bebé', 'Termómetro de baño', 'Pienso hipoalergénico para perros', 'Pienso sin cereales para gatos', 'Snacks naturales para perros', 'Latas de paté para gatos', 'Juguetes de cuerda para perros', 'Plumeros para gatos', 'Lecho vegetal para roedores', 'Piedras minerales para pájaros'];
     cargarDatos();
     render();
     console.log("Fase 3 completada: Funcionalidades avanzadas implementadas.");

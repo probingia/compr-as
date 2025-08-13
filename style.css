@@ -81,5 +81,15 @@ body {
     font-weight: bold;
     color: #198754; /* Verde de Bootstrap */
     font-size: 1.2em;
-    line-height: 1;
+    line-height: 1; /* Alineación vertical */
+}
+
+/* Color para el icono del título */
+.icon-titulo {
+    color: #198754; /* Verde de Bootstrap */
+}
+
+/* Color para el icono del micrófono */
+.icon-microfono {
+    color: #dc3545; /* Rojo de Bootstrap */
 }
