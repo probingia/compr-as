@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
             { id: 7, nombre: 'Bebidas' }, { id: 8, nombre: 'Despensa' },
         ];
         tiendas = JSON.parse(localStorage.getItem('compras-tiendas')) || [
-            { id: 1, nombre: 'Supermercado General' }, { id: 2, nombre: 'Mercado Local' },
+            { id: 1, nombre: 'Carrefour' }, { id: 2, nombre: 'Mercadona' },
             { id: 3, nombre: 'Farmacia' }
         ];
     };
