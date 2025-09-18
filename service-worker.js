@@ -1,16 +1,16 @@
 const CACHE_NAME = 'compr-as-cache-v1.1';
 const urlsToCache = [
-    '/',
-    '/index.html',
-    '/style.css',
-    '/app.js',
-    '/manifest.json',
+    './',
+    'index.html',
+    'style.css',
+    'app.js',
+    'manifest.json',
     'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css',
     'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css',
     'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js',
     'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js',
-    '/images/icon-192.png',
-    '/images/icon-512.png'
+    'images/icon-192.png',
+    'images/icon-512.png'
 ];
 
 // Evento de Instalación: se dispara cuando el SW se instala.
