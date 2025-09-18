@@ -1,36 +1,21 @@
-const CACHE_NAME = 'compr-as-cache-v2.6'; // Versión actualizada para reflejar nueva estrategia
+const CACHE_NAME = 'compr-as-cache-v1.1';
 const urlsToCache = [
-    './',
-    './index.html',
-    './style.css',
-    './productos.json',
-    './tiendas.json',
-    './manifest.json',
-    './images/icon-192.png',
-    './images/icon-512.png',
-    // Módulos de JS
-    './js/api.js',
-    './js/confirm.js',
-    './js/dom.js',
-    './js/events.js',
-    './js/importParser.js',
-    './js/notifications.js',
-    './js/pdfGenerator.js',
-    './js/render.js',
-    './js/state.js',
-    './js/utils.js',
-    // Librerías locales
-    './libs/bootstrap/bootstrap.min.css',
-    './libs/bootstrap-icons/bootstrap-icons.min.css',
-    './libs/bootstrap-icons/fonts/bootstrap-icons.woff',
-    './libs/bootstrap-icons/fonts/bootstrap-icons.woff2',
-    './libs/bootstrap/bootstrap.bundle.min.js',
-    './libs/jspdf/jspdf.umd.min.js',
-    './libs/html2canvas/html2canvas.min.js'
+    '/',
+    '/index.html',
+    '/style.css',
+    '/app.js',
+    '/manifest.json',
+    'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css',
+    'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css',
+    'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js',
+    'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js',
+    '/images/icon-192.png',
+    '/images/icon-512.png'
 ];
 
+// Evento de Instalación: se dispara cuando el SW se instala.
 self.addEventListener('install', event => {
-    console.log('[Service Worker] Instalando nueva versión...');
+    console.log('[Service Worker] Instalando...');
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => {
@@ -43,8 +28,10 @@ self.addEventListener('install', event => {
     );
 });
 
+// Evento de Activación: se dispara cuando el SW se activa.
+// Es el lugar ideal para limpiar cachés antiguos.
 self.addEventListener('activate', event => {
-    console.log('[Service Worker] Activando nueva versión...');
+    console.log('[Service Worker] Activando...');
     event.waitUntil(
         caches.keys().then(cacheNames => {
             return Promise.all(
@@ -60,35 +47,20 @@ self.addEventListener('activate', event => {
     return self.clients.claim();
 });
 
+// Evento Fetch: se dispara con cada petición de red (ej. CSS, JS, imágenes).
+// Estrategia: Cache First (primero busca en caché, si no, va a la red).
 self.addEventListener('fetch', event => {
-    // Ignorar peticiones que no son GET
-    if (event.request.method !== 'GET') {
-        return;
-    }
-
-    // Estrategia: Stale-While-Revalidate
     event.respondWith(
-        caches.open(CACHE_NAME).then(cache => {
-            return cache.match(event.request)
-                .then(cachedResponse => {
-                    const fetchPromise = fetch(event.request).then(networkResponse => {
-                        // Si la petición a la red es exitosa, la guardamos en caché para la próxima vez
-                        if (networkResponse.ok) {
-                            cache.put(event.request, networkResponse.clone());
-                        }
-                        return networkResponse;
-                    });
-
-                    // Devolvemos la respuesta de la caché inmediatamente si existe,
-                    // si no, esperamos a la respuesta de la red.
-                    return cachedResponse || fetchPromise;
-                });
-        })
+        caches.match(event.request)
+            .then(response => {
+                // Si la respuesta está en el caché, la devuelve.
+                if (response) {
+                    // console.log(`[Service Worker] Sirviendo desde caché: ${event.request.url}`);
+                    return response;
+                }
+                // Si no, hace la petición a la red.
+                // console.log(`[Service Worker] Buscando en red: ${event.request.url}`);
+                return fetch(event.request);
+            })
     );
-});
-
-self.addEventListener('message', event => {
-    if (event.data.action === 'skipWaiting') {
-        self.skipWaiting();
-    }
 });

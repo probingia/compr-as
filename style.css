@@ -1,93 +1,95 @@
-/* Estilos Generales */
-html {
-    overflow-y: scroll;
-}
-
-html.font-size-normal body {
-    font-size: 16px;
-}
-
-html.font-size-large body {
-    font-size: 20px;
-}
-
-html.font-size-xlarge body {
-    font-size: 24px;
-}
-
-.icon-titulo {
-    color: #198754; /* Verde Bootstrap 'success' */
-}
-
-.icon-microfono {
-    color: #dc3545; /* Rojo Bootstrap 'danger' */
-}
-
-@keyframes blink {
-    0% { opacity: 1; }
-    50% { opacity: 0.3; }
-    100% { opacity: 1; }
-}
-
-.blinking {
-    animation: blink 1.2s infinite;
+body {
+    background-color: #f8f9fa;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 .card {
     border: none;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 }
 
+.producto-item {
+    transition: background-color 0.3s ease;
+}
 
-
-/* Prioridades */
-.prioridad-alta { border-inline-start: 5px solid #dc3545; }
-.prioridad-media { border-inline-start: 5px solid #ffc107; }
-.prioridad-baja { border-inline-start: 5px solid #198754; }
-
-/* Producto comprado */
 .producto-item.comprado {
-    opacity: 0.65; /* Ligera transparencia */
-    border-inline-start-color: transparent !important; /* Eliminar color de prioridad */
-}
-
-.producto-item.comprado .fw-bold.fs-5 {
     text-decoration: line-through;
-    color: #6c757d;
+    opacity: 0.6;
 }
 
-/* Loading Spinner */
-#loading-overlay {
-    position: fixed;
-    top: 0;
+.producto-item.comprado .form-check-label {
+    text-decoration: line-through;
+}
+
+.prioridad-alta { border-left: 5px solid #dc3545; }
+.prioridad-media { border-left: 5px solid #ffc107; }
+.prioridad-baja { border-left: 5px solid #0d6efd; }
+
+.btn-group .btn {
+    white-space: nowrap;
+}
+
+.form-check-input:checked {
+    background-color: #198754;
+    border-color: #198754;
+}
+
+.categoria-header {
+    cursor: pointer;
+    user-select: none;
+}
+
+/* --- Estilos para Modo de Exportación de Imagen --- */
+
+/* 1. Añadir margen izquierdo y asegurar un fondo consistente */
+.export-mode #lista-compras {
+    padding-left: 20px;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    background-color: #f8f9fa;
+}
+
+/* 2. Ocultar elementos no deseados (botones de acción y contadores) */
+.export-mode .btn-editar,
+.export-mode .btn-eliminar,
+.export-mode .badge {
+    display: none;
+}
+
+/* 3. Ocultar la barra de prioridad para items ya comprados */
+.export-mode .producto-item.comprado {
+    border-left-color: transparent;
+}
+
+/* 4. Reemplazar el checkbox con un check verde y alinear el texto */
+.export-mode .form-check-input {
+    display: none; /* Ocultamos el checkbox original */
+}
+
+/* Creamos un espacio a la izquierda del texto de todos los productos */
+.export-mode .form-check-label {
+    padding-left: 1.8em; 
+    position: relative; /* Necesario para posicionar el check */
+}
+
+/* Posicionamos el check dentro del espacio creado para los items comprados */
+.export-mode .producto-item.comprado .form-check-label::before {
+    content: '✓';
+    position: absolute;
     left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(255, 255, 255, 0.7);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1050;
+    top: 0.05em;
+    font-weight: bold;
+    color: #198754; /* Verde de Bootstrap */
+    font-size: 1.2em;
+    line-height: 1; /* Alineación vertical */
 }
 
-/* Estilos para el autocompletado en el modal de gestión */
-#lista-autocompletado-gestion .list-group-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+/* Color para el icono del título */
+.icon-titulo {
+    color: #198754; /* Verde de Bootstrap */
 }
 
-
-
-/* Contenedor de notificaciones */
-#notification-container {
-    position: fixed;
-    top: 1rem;
-    right: 1rem;
-    z-index: 2050; /* Más alto que los modales (1055) */
-    width: 350px;
-    max-width: 90%;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+/* Color para el icono del micrófono */
+.icon-microfono {
+    color: #dc3545; /* Rojo de Bootstrap */
 }
